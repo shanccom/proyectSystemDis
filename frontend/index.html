@@ -3,124 +3,101 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Voting System - Dev Portal</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f0f2f5;
-      color: #1a1a2e;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-    }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 0.25rem;
-      color: #16213e;
-    }
-    .subtitle {
-      color: #666;
-      margin-bottom: 2rem;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1.5rem;
-      width: 100%;
-      max-width: 900px;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transition: transform 0.2s;
-    }
-    .card:hover { transform: translateY(-4px); }
-    .card h2 {
-      font-size: 1.1rem;
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .card p {
-      font-size: 0.85rem;
-      color: #555;
-      margin-bottom: 0.75rem;
-    }
-    .card a {
-      display: inline-block;
-      background: #16213e;
-      color: white;
-      text-decoration: none;
-      padding: 0.4rem 1rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-    }
-    .card a:hover { background: #0f3460; }
-    .tag {
-      display: inline-block;
-      font-size: 0.7rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 99px;
-      font-weight: 600;
-    }
-    .tag.java { background: #b7e4c7; color: #1b4332; }
-    .tag.js   { background: #ffd6a5; color: #7f4f24; }
-    .tag.devops { background: #a0c4ff; color: #0a2463; }
-    .footer {
-      margin-top: 2.5rem;
-      font-size: 0.8rem;
-      color: #999;
-    }
-  </style>
+  <title>Voting System</title>
+  <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
-  <h1>Electronic Voting System</h1>
-  <p class="subtitle">Development Portal - Team Guide</p>
+  <header>
+    <h1>Electronic Voting System</h1>
+    <span>User: <strong id="user-name">---</strong></span>
+  </header>
 
-  <div class="grid">
-    <div class="card">
-      <h2><span class="tag java">Java 21</span> Auth Service</h2>
-      <p>Register, login, JWT tokens. Port <strong>8081</strong>.</p>
-      <a href="http://localhost:8081/health" target="_blank">Check health</a>
+  <main>
+    <div class="steps">
+      <div class="step" id="step-login">
+        <span class="step-num">1</span> Login
+      </div>
+      <span class="arrow">&#9654;</span>
+      <div class="step" id="step-elections">
+        <span class="step-num">2</span> Elections
+      </div>
+      <span class="arrow">&#9654;</span>
+      <div class="step" id="step-vote">
+        <span class="step-num">3</span> Vote
+      </div>
+      <span class="arrow">&#9654;</span>
+      <div class="step" id="step-confirm">
+        <span class="step-num">4</span> Confirm
+      </div>
+      <span class="arrow">&#9654;</span>
+      <div class="step" id="step-results">
+        <span class="step-num">5</span> Results
+      </div>
     </div>
 
-    <div class="card">
-      <h2><span class="tag java">Java 21</span> Voting Service</h2>
-      <p>Elections list, vote submission. Port <strong>8082</strong>.</p>
-      <a href="http://localhost:8082/health" target="_blank">Check health</a>
+    <!-- Step 1: Login -->
+    <div class="card" id="login">
+      <h2 id="login-title">Login</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" placeholder="user@example.com" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="Enter your password" required />
+        </div>
+        <button type="submit" class="btn btn-primary" id="login-btn">Login</button>
+        <p class="mt-1" style="font-size:0.85rem">
+          <a href="#" id="register-link">Don't have an account? Register</a>
+        </p>
+      </form>
     </div>
 
-    <div class="card">
-      <h2><span class="tag java">Java 21</span> Admin Service</h2>
-      <p>Candidates, results, manage elections. Port <strong>8083</strong>.</p>
-      <a href="http://localhost:8083/health" target="_blank">Check health</a>
+    <!-- Step 2: Elections -->
+    <div class="card hidden" id="elections">
+      <h2>Select an Election</h2>
+      <ul class="election-list" id="elections-list"></ul>
     </div>
 
-    <div class="card">
-      <h2><span class="tag js">Node 20</span> Frontend</h2>
-      <p>React app (Vite). Port <strong>5173</strong>.</p>
-      <a href="http://localhost:5173" target="_blank">Open frontend</a>
+    <!-- Step 3: Vote -->
+    <div class="card hidden" id="vote">
+      <div class="flex-between">
+        <h2>Vote</h2>
+        <span style="font-size:0.8rem;color:#666">Election: <strong id="selected-election-name"></strong></span>
+      </div>
+      <p style="margin-bottom:1rem;font-size:0.85rem;color:#555">Select a candidate:</p>
+      <ul class="candidate-list" id="candidates-list"></ul>
+      <div class="mt-1">
+        <button class="btn btn-success" id="vote-btn" disabled>Vote</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('elections').classList.remove('hidden');document.getElementById('vote').classList.add('hidden')">Back</button>
+      </div>
     </div>
 
-    <div class="card">
-      <h2><span class="tag devops">Docker</span> PostgreSQL</h2>
-      <p>Database <code>voting_system</code>. Port <strong>5432</strong>.</p>
-      <a href="#" onclick="alert('DB: localhost:5432 / user_admin / password_secret'); return false;">Show credentials</a>
+    <!-- Step 4: Confirm -->
+    <div class="card hidden text-center" id="confirm">
+      <h2>Confirm your vote</h2>
+      <p style="margin:1rem 0;font-size:1.1rem">
+        Vote for <strong id="confirm-candidate"></strong>
+      </p>
+      <p style="font-size:0.85rem;color:#666">Election: <span id="confirm-election"></span></p>
+      <div class="mt-1" style="display:flex;gap:1rem;justify-content:center">
+        <button class="btn btn-success" id="confirm-yes">Yes, vote</button>
+        <button class="btn btn-secondary" id="confirm-no">Cancel</button>
+      </div>
+      <div class="alert alert-success hidden mt-1" id="vote-success">
+        Vote registered successfully!
+      </div>
     </div>
 
-    <div class="card">
-      <h2><span class="tag devops">Docker</span> Compose</h2>
-      <p>All services defined in <code>docker-compose.yml</code>.</p>
-      <a href="#" onclick="alert('Run: docker-compose up --build'); return false;">Show command</a>
+    <!-- Step 5: Results -->
+    <div class="card hidden" id="results">
+      <h2 id="results-title">Results</h2>
+      <div id="results-body"></div>
+      <button class="btn btn-secondary mt-1" id="back-to-elections">Back to elections</button>
     </div>
-  </div>
+  </main>
 
-  <p class="footer">Developed for Sistemas Distribuidos - UNSA 2026</p>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>
