@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: voting-db
+    environment:
+      POSTGRES_USER: user_admin
+      POSTGRES_PASSWORD: password_secret
+      POSTGRES_DB: voting_system
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - voting-network
+
+  auth-service:
+    build: ./backend/auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/voting_system
+      - SPRING_DATASOURCE_USERNAME=user_admin
+      - SPRING_DATASOURCE_PASSWORD=password_secret
+    depends_on:
+      - postgres-db
+    networks:
+      - voting-network
+
+  voting-service:
+    build: ./backend/voting-service
+    container_name: voting-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/voting_system
+      - SPRING_DATASOURCE_USERNAME=user_admin
+      - SPRING_DATASOURCE_PASSWORD=password_secret
+    depends_on:
+      - postgres-db
+    networks:
+      - voting-network
+
+  admin-service:
+    build: ./backend/admin-service
+    container_name: admin-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/voting_system
+      - SPRING_DATASOURCE_USERNAME=user_admin
+      - SPRING_DATASOURCE_PASSWORD=password_secret
+    depends_on:
+      - postgres-db
+    networks:
+      - voting-network
+
+  frontend:
+    build: ./frontend
+    container_name: voting-frontend
+    ports:
+      - "5173:5173"
+    networks:
+      - voting-network
+
+networks:
+  voting-network:
+    driver: bridge

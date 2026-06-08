@@ -1,0 +1,13 @@
+# Build
+target/
+build/
+dist/
+node_modules/
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
