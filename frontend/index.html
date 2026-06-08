@@ -1,14 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Voting System</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <p style="text-align:center;margin-top:40vh;font-family:sans-serif;font-size:1.5rem;">
-      Frontend Voting System
-    </p>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voting System - Dev Portal</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.25rem;
+      color: #16213e;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 2rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 900px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s;
+    }
+    .card:hover { transform: translateY(-4px); }
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card p {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 0.75rem;
+    }
+    .card a {
+      display: inline-block;
+      background: #16213e;
+      color: white;
+      text-decoration: none;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .card a:hover { background: #0f3460; }
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+      font-weight: 600;
+    }
+    .tag.java { background: #b7e4c7; color: #1b4332; }
+    .tag.js   { background: #ffd6a5; color: #7f4f24; }
+    .tag.devops { background: #a0c4ff; color: #0a2463; }
+    .footer {
+      margin-top: 2.5rem;
+      font-size: 0.8rem;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <h1>Electronic Voting System</h1>
+  <p class="subtitle">Development Portal - Team Guide</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2><span class="tag java">Java 21</span> Auth Service</h2>
+      <p>Register, login, JWT tokens. Port <strong>8081</strong>.</p>
+      <a href="http://localhost:8081/health" target="_blank">Check health</a>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag java">Java 21</span> Voting Service</h2>
+      <p>Elections list, vote submission. Port <strong>8082</strong>.</p>
+      <a href="http://localhost:8082/health" target="_blank">Check health</a>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag java">Java 21</span> Admin Service</h2>
+      <p>Candidates, results, manage elections. Port <strong>8083</strong>.</p>
+      <a href="http://localhost:8083/health" target="_blank">Check health</a>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag js">Node 20</span> Frontend</h2>
+      <p>React app (Vite). Port <strong>5173</strong>.</p>
+      <a href="http://localhost:5173" target="_blank">Open frontend</a>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag devops">Docker</span> PostgreSQL</h2>
+      <p>Database <code>voting_system</code>. Port <strong>5432</strong>.</p>
+      <a href="#" onclick="alert('DB: localhost:5432 / user_admin / password_secret'); return false;">Show credentials</a>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag devops">Docker</span> Compose</h2>
+      <p>All services defined in <code>docker-compose.yml</code>.</p>
+      <a href="#" onclick="alert('Run: docker-compose up --build'); return false;">Show command</a>
+    </div>
+  </div>
+
+  <p class="footer">Developed for Sistemas Distribuidos - UNSA 2026</p>
+</body>
 </html>

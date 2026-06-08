@@ -37,6 +37,18 @@ Esto hará lo siguiente:
 3.  Compilará y levantará los 3 servicios de Backend.
 4.  Levantará el servidor de desarrollo de React.
 
+## Servicios y ubicacion
+
+| Servicio | URL | Verificar con |
+|---|---|---|
+| Auth Service | `http://localhost:8081/health` | `curl localhost:8081/health` |
+| Voting Service | `http://localhost:8082/health` | `curl localhost:8082/health` |
+| Admin Service | `http://localhost:8083/health` | `curl localhost:8083/health` |
+| Frontend | `http://localhost:5173` | Abrir en el navegador |
+| PostgreSQL | `localhost:5432` | `docker exec -it voting-db psql -U user_admin -d voting_system` |
+
+Cada integrante debe verificar que su servicio responde correctamente antes de integrar cambios.
+
 ## Decisiones Técnicas
 - **Separación de Servicios:** Permite que si el servicio de resultados (Admin) falla, el proceso de votación siga funcionando.
 - **Dockerización:** Garantiza que el proyecto funcione igual en la computadora de cualquier integrante y en el servidor final.
