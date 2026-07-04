@@ -1,9 +1,21 @@
 package com.voting.voting.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+
+@Schema(description = "Vote registration request")
 public class VoteRequest {
 
+    @Schema(example = "1")
+    @NotNull
     private Long userId;
+
+    @Schema(example = "10")
+    @NotNull
     private Long electionId;
+
+    @Schema(example = "3")
+    @NotNull
     private Long candidateId;
 
     public Long getUserId() {
@@ -29,4 +41,5 @@ public class VoteRequest {
     public void setCandidateId(Long candidateId) {
         this.candidateId = candidateId;
     }
+
 }

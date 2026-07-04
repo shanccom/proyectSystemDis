@@ -1,62 +1,58 @@
 package com.voting.voting.controller;
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.voting.voting.dto.ElectionResultResponse;
-import com.voting.voting.dto.StatisticsResponse;
-import com.voting.voting.dto.VoteRequest;
-import com.voting.voting.dto.VoteResponse;
+import com.voting.voting.dto.*;
+import com.voting.voting.service.ResultService;
 import com.voting.voting.service.VoteService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/votes")
+@Tag(
+        name = "Voting",
+        description = "Endpoints for vote registration and election results"
+)
 public class VoteController {
 
     private final VoteService voteService;
+    private final ResultService resultService;
 
     public VoteController(
-            VoteService voteService
+            VoteService voteService,
+            ResultService resultService
     ) {
         this.voteService = voteService;
+        this.resultService = resultService;
     }
 
+    @Operation(summary = "Register a vote")
     @PostMapping
     public VoteResponse vote(
+            @Valid
             @RequestBody
             VoteRequest request
     ) {
-        return voteService.registerVote(
-                request
-        );
+        return voteService.registerVote(request);
     }
 
+    @Operation(summary = "Get election results")
     @GetMapping("/results/{electionId}")
-    public List<ElectionResultResponse>
-    results(
-            @PathVariable
-            Long electionId
+    public List<ElectionResultResponse> getResults(
+            @PathVariable Long electionId
     ) {
-
-        return voteService.getResults(
-                electionId
-        );
+        return resultService.getResults(electionId);
     }
 
+    @Operation(summary = "Get election statistics")
     @GetMapping("/statistics/{electionId}")
-    public StatisticsResponse statistics(
-            @PathVariable
-            Long electionId
+    public StatisticsResponse getStatistics(
+            @PathVariable Long electionId
     ) {
-
-        return voteService.getStatistics(
-                electionId
-        );
+        return resultService.getStatistics(electionId);
     }
+
 }
