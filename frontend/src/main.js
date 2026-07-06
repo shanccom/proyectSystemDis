@@ -1,8 +1,4 @@
-const API = {
-  auth: 'http://localhost:8081',
-  voting: 'http://localhost:8082',
-  admin: 'http://localhost:8083',
-};
+const API_GATEWAY = import.meta.env.VITE_API_GATEWAY || 'http://localhost:8080';
 
 const steps = ['login', 'elections', 'vote', 'confirm', 'results'];
 let currentStep = 0;
@@ -34,11 +30,11 @@ function updateStepIndicator(id) {
   });
 }
 
-async function apiCall(url, options = {}) {
+async function apiCall(path, options = {}) {
   const headers = { 'Content-Type': 'application/json' };
   if (state.token) headers['Authorization'] = `Bearer ${state.token}`;
   try {
-    const res = await fetch(url, { ...options, headers, mode: 'cors' });
+    const res = await fetch(`${API_GATEWAY}${path}`, { ...options, headers, mode: 'cors' });
     if (!res.ok) {
       const txt = await res.text();
       return { error: txt || `HTTP ${res.status}` };
@@ -46,7 +42,7 @@ async function apiCall(url, options = {}) {
     const txt = await res.text();
     return txt ? { data: JSON.parse(txt) } : { data: null };
   } catch (e) {
-    return { error: 'Service not available (use mock mode)' };
+    return { error: 'Service not available' };
   }
 }
 
@@ -60,39 +56,22 @@ function getMockElections() {
 
 function getMockCandidates(electionId) {
   const all = {
-    1: [
-      { id: 1, name: 'Dr. Carlos Lopez', party: 'Lista A' },
-      { id: 2, name: 'Dra. Maria Torres', party: 'Lista B' },
-      { id: 3, name: 'Mg. Juan Perez', party: 'Lista C' },
-    ],
-    2: [
-      { id: 4, name: 'Ana Quispe', party: 'Frente Unico' },
-      { id: 5, name: 'Luis Garcia', party: 'Nueva Generacion' },
-    ],
+    1: [{ id: 1, name: 'Dr. Carlos Lopez', party: 'Lista A' }, { id: 2, name: 'Dra. Maria Torres', party: 'Lista B' }, { id: 3, name: 'Mg. Juan Perez', party: 'Lista C' }],
+    2: [{ id: 4, name: 'Ana Quispe', party: 'Frente Unico' }, { id: 5, name: 'Luis Garcia', party: 'Nueva Generacion' }],
   };
   return all[electionId] || [];
 }
 
 function getMockResults(electionId) {
   const all = {
-    1: [
-      { name: 'Dr. Carlos Lopez', votes: 1240, pct: 42 },
-      { name: 'Dra. Maria Torres', votes: 980, pct: 33 },
-      { name: 'Mg. Juan Perez', votes: 740, pct: 25 },
-    ],
-    2: [
-      { name: 'Ana Quispe', votes: 560, pct: 58 },
-      { name: 'Luis Garcia', votes: 410, pct: 42 },
-    ],
+    1: [{ name: 'Dr. Carlos Lopez', votes: 1240, pct: 42 }, { name: 'Dra. Maria Torres', votes: 980, pct: 33 }, { name: 'Mg. Juan Perez', votes: 740, pct: 25 }],
+    2: [{ name: 'Ana Quispe', votes: 560, pct: 58 }, { name: 'Luis Garcia', votes: 410, pct: 42 }],
   };
   return all[electionId] || [];
 }
 
-function simulateDelay() {
-  return new Promise(r => setTimeout(r, 500));
-}
+function simulateDelay() { return new Promise(r => setTimeout(r, 500)); }
 
-// --- Login ---
 $('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = $('login-email').value;
@@ -100,7 +79,7 @@ $('login-form').addEventListener('submit', async (e) => {
   $('login-btn').disabled = true;
   $('login-btn').textContent = 'Loading...';
 
-  const result = await apiCall(`${API.auth}/auth/login`, {
+  const result = await apiCall('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
@@ -109,9 +88,9 @@ $('login-form').addEventListener('submit', async (e) => {
 
   if (result.data) {
     state.token = result.data.token;
-    state.user = { email, name: email.split('@')[0] };
+    state.user = { id: result.data.userId, email, name: email.split('@')[0], role: result.data.role };
   } else {
-    state.user = { email, name: email.split('@')[0] };
+    state.user = { id: 1, email, name: email.split('@')[0] };
     state.token = 'mock-token';
   }
 
@@ -126,17 +105,43 @@ $('register-link').addEventListener('click', (e) => {
   e.preventDefault();
   $('login-title').textContent = 'Register';
   $('login-btn').textContent = 'Register';
-  $('register-link').classList.add('hidden');
+  $('login-form').onsubmit = async (ev) => {
+    ev.preventDefault();
+    const email = $('login-email').value;
+    const password = $('login-password').value;
+    const username = email.split('@')[0];
+    $('login-btn').disabled = true;
+    $('login-btn').textContent = 'Loading...';
+
+    const result = await apiCall('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, email, password }),
+    });
+
+    await simulateDelay();
+
+    if (result.data) {
+      state.token = result.data.token;
+      state.user = { id: result.data.userId, email, name: username, role: result.data.role };
+      $('user-name').textContent = state.user.name;
+      $('login-btn').disabled = false;
+      $('login-btn').textContent = 'Register';
+      showStep('elections');
+      loadElections();
+    } else {
+      $('login-btn').disabled = false;
+      $('login-btn').textContent = 'Register';
+      $('login-error').classList.remove('hidden');
+      $('login-error').textContent = 'Registration failed';
+    }
+  };
 });
 
-// --- Elections ---
 async function loadElections() {
   $('elections-list').innerHTML = '<p style="color:#999">Loading elections...</p>';
-  const result = await apiCall(`${API.voting}/elections`);
-
+  const result = await apiCall('/api/elections');
   await simulateDelay();
   state.elections = result.data || getMockElections();
-
   renderElections();
 }
 
@@ -149,7 +154,7 @@ function renderElections() {
   list.innerHTML = state.elections.map(e => `
     <li onclick="selectElection(${e.id})" data-id="${e.id}">
       <h3>${e.title}</h3>
-      <p>${e.description} <span style="font-weight:600;color:${e.status === 'OPEN' ? '#2d6a4f' : '#999'}">[${e.status}]</span></p>
+      <p>${e.description || ''} <span style="font-weight:600;color:${e.status === 'OPEN' ? '#2d6a4f' : '#999'}">[${e.status}]</span></p>
     </li>
   `).join('');
 }
@@ -165,14 +170,11 @@ function selectElection(id) {
   loadCandidates(id);
 }
 
-// --- Vote / Candidates ---
 async function loadCandidates(electionId) {
   $('candidates-list').innerHTML = '<p style="color:#999">Loading candidates...</p>';
-  const result = await apiCall(`${API.voting}/elections/${electionId}/candidates`);
-
+  const result = await apiCall(`/api/elections/${electionId}/candidates`);
   await simulateDelay();
   state.candidates = result.data || getMockCandidates(electionId);
-
   renderCandidates();
 }
 
@@ -203,20 +205,19 @@ function selectCandidate(id) {
 
 $('vote-btn').addEventListener('click', async () => {
   if (!state.selectedCandidate || !state.selectedElection) return;
-
   $('vote-btn').disabled = true;
   $('vote-btn').textContent = 'Submitting vote...';
 
-  const result = await apiCall(`${API.voting}/votes`, {
+  const result = await apiCall('/api/votes', {
     method: 'POST',
     body: JSON.stringify({
-      election_id: state.selectedElection.id,
-      candidate_id: state.selectedCandidate.id,
+      userId: state.user.id,
+      electionId: state.selectedElection.id,
+      candidateId: state.selectedCandidate.id,
     }),
   });
 
   await simulateDelay();
-
   $('vote-btn').disabled = false;
   $('vote-btn').textContent = 'Vote';
   showStep('confirm');
@@ -224,7 +225,6 @@ $('vote-btn').addEventListener('click', async () => {
   $('confirm-election').textContent = state.selectedElection.title;
 });
 
-// --- Confirm ---
 $('confirm-yes').addEventListener('click', () => {
   $('confirm-yes').disabled = true;
   $('confirm-no').disabled = true;
@@ -242,16 +242,12 @@ $('confirm-no').addEventListener('click', () => {
   showStep('vote');
 });
 
-// --- Results ---
 async function loadResults(electionId) {
   $('results-title').textContent = `Results: ${state.selectedElection.title}`;
   $('results-body').innerHTML = '<p style="color:#999">Loading results...</p>';
-
-  const result = await apiCall(`${API.admin}/results?election_id=${electionId}`);
-
+  const result = await apiCall(`/api/results/${electionId}/candidates`);
   await simulateDelay();
   state.results = result.data || getMockResults(electionId);
-
   renderResults();
 }
 
@@ -261,18 +257,20 @@ function renderResults() {
     body.innerHTML = '<p style="color:#999">No results yet.</p>';
     return;
   }
-  const max = Math.max(...state.results.map(r => r.pct));
-  body.innerHTML = state.results.map(r => `
+  const total = state.results.reduce((s, r) => s + (r.voteCount || r.votes || 0), 0);
+  body.innerHTML = state.results.map(r => {
+    const votes = r.voteCount || r.votes || 0;
+    const pct = total > 0 ? Math.round((votes / total) * 100) : 0;
+    return `
     <div class="result-item">
-      <span class="result-name">${r.name}</span>
+      <span class="result-name">${r.candidateName || r.name}</span>
       <div class="result-bar">
-        <div class="result-fill" style="width:${r.pct}%">
-          ${r.pct}%
-        </div>
+        <div class="result-fill" style="width:${pct}%">${pct}%</div>
       </div>
-      <span style="font-size:0.85rem;color:#666;width:60px;text-align:right">${r.votes} votes</span>
-    </div>
-  `).join('');
+      <span style="font-size:0.85rem;color:#666;width:60px;text-align:right">${votes} votes</span>
+    </div>`;
+  }).join('');
+  body.innerHTML += `<p style="margin-top:1rem;font-weight:600">Total: ${total} votes</p>`;
 }
 
 $('back-to-elections').addEventListener('click', () => {
@@ -280,5 +278,4 @@ $('back-to-elections').addEventListener('click', () => {
   loadElections();
 });
 
-// --- Start ---
 showStep('login');

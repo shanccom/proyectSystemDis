@@ -1,64 +1,87 @@
 package com.voting.voting.service;
 
-import com.voting.voting.client.AdminServiceClient;
 import com.voting.voting.dto.VoteRequest;
 import com.voting.voting.dto.VoteResponse;
+import com.voting.voting.entity.Election;
 import com.voting.voting.entity.Vote;
+import com.voting.voting.event.VoteEvent;
+import com.voting.voting.event.VoteEventPublisher;
 import com.voting.voting.exception.VoteAlreadyExistsException;
+import com.voting.voting.repository.ElectionRepository;
 import com.voting.voting.repository.VoteRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 
 @Service
 public class VoteService {
 
     private final VoteRepository voteRepository;
-    private final AdminServiceClient adminServiceClient;
+    private final ElectionRepository electionRepository;
+    private final VoteEventPublisher eventPublisher;
 
-    public VoteService(
-            VoteRepository voteRepository,
-            AdminServiceClient adminServiceClient
-    ) {
+    public VoteService(VoteRepository voteRepository,
+                       ElectionRepository electionRepository,
+                       VoteEventPublisher eventPublisher) {
         this.voteRepository = voteRepository;
-        this.adminServiceClient = adminServiceClient;
+        this.electionRepository = electionRepository;
+        this.eventPublisher = eventPublisher;
     }
 
+    @Transactional
     public VoteResponse registerVote(VoteRequest request) {
+        Election election = electionRepository.findById(request.getElectionId())
+                .orElseThrow(() -> new IllegalArgumentException("Election not found"));
 
-        validateElection(request.getElectionId());
-        validateCandidate(request.getCandidateId());
-        validateElectionStatus(request.getElectionId());
-        validateDuplicateVote(request.getUserId(), request.getElectionId());
+        if (!election.isOpen()) {
+            throw new IllegalStateException("Election is not open");
+        }
+
+        if (voteRepository.existsByUserIdAndElectionId(
+                request.getUserId(), request.getElectionId())) {
+            throw new VoteAlreadyExistsException();
+        }
+
+        String previousHash = voteRepository.findLastByElectionId(request.getElectionId())
+                .map(Vote::getHash)
+                .orElse("0");
 
         Vote vote = new Vote();
         vote.setUserId(request.getUserId());
         vote.setElectionId(request.getElectionId());
         vote.setCandidateId(request.getCandidateId());
+        vote.setPreviousHash(previousHash);
+        vote.setHash(computeHash(vote, previousHash));
         vote.setVotedAt(LocalDateTime.now());
 
-        voteRepository.save(vote);
+        vote = voteRepository.save(vote);
 
-        return new VoteResponse("Vote registered successfully");
+        eventPublisher.publish(new VoteEvent(
+                vote.getId(), vote.getUserId(), vote.getElectionId(),
+                vote.getCandidateId(), vote.getHash(),
+                vote.getPreviousHash(), vote.getVotedAt()
+        ));
+
+        return new VoteResponse("Vote registered successfully", vote.getHash());
     }
 
-    private void validateElection(Long electionId) {
-        adminServiceClient.getElection(electionId);
-    }
-
-    private void validateCandidate(Long candidateId) {
-        adminServiceClient.getCandidate(candidateId);
-    }
-
-    private void validateElectionStatus(Long electionId) {
-        if (!adminServiceClient.isElectionOpen(electionId)) {
-            throw new IllegalStateException("Election is closed");
-        }
-    }
-
-    private void validateDuplicateVote(Long userId, Long electionId) {
-        if (voteRepository.existsByUserIdAndElectionId(userId, electionId)) {
-            throw new VoteAlreadyExistsException();
+    private String computeHash(Vote vote, String previousHash) {
+        try {
+            String data = vote.getUserId() + "|" +
+                    vote.getElectionId() + "|" +
+                    vote.getCandidateId() + "|" +
+                    vote.getVotedAt() + "|" +
+                    previousHash;
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(data.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hashBytes);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 not available", e);
         }
     }
 }

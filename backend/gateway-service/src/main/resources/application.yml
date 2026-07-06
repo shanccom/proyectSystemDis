@@ -1,0 +1,51 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
+          predicates:
+            - Path=/api/auth/**
+
+        - id: voting-service
+          uri: ${VOTING_SERVICE_URL:http://voting-service:8082}
+          predicates:
+            - Path=/api/votes/**, /api/elections/**, /api/candidates/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: admin-service
+          uri: ${ADMIN_SERVICE_URL:http://admin-service:8083}
+          predicates:
+            - Path=/api/admin/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: admin-results
+          uri: ${ADMIN_SERVICE_URL:http://admin-service:8083}
+          predicates:
+            - Path=/api/results/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+  redis:
+    host: ${REDIS_HOST:redis}
+    port: ${REDIS_PORT:6379}
+
+  main:
+    web-application-type: reactive
+
+jwt:
+  secret: ${JWT_SECRET:base64secretforjwtsigningkey12345678901234567890}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    tags:
+      application: gateway-service

@@ -1,0 +1,104 @@
+%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#eef2ff','primaryBorderColor':'#4f46e5','lineColor':'#4f46e5','fontFamily':'monospace'}}}%%
+flowchart TB
+
+    Usuarios(["👥 Usuarios / Votantes"])
+
+    subgraph FE["FRONTEND"]
+        direction TB
+        FE_NOTE["React (Vite)\nConsume API REST via Gateway"]
+    end
+
+    subgraph GW["API GATEWAY"]
+        direction TB
+        Gateway["Spring Cloud Gateway"]
+        GW_NOTE["- Autenticación JWT\n- Rate Limiting\n- Routing\n- Logging"]
+    end
+
+    subgraph MS["MICROSERVICIOS (Spring Boot)"]
+        direction LR
+
+        subgraph Auth["AUTH SERVICE"]
+            direction TB
+            AuthS["Spring Boot + Spring Security\n- Registro\n- Login\n- Generación JWT"]
+        end
+
+        subgraph Voting["VOTING SERVICE"]
+            direction TB
+            VotingS["Spring Boot + Spring Web\n- Emisión de votos\n- Validación de reglas\n- Publica eventos"]
+        end
+
+        subgraph Admin["ADMIN SERVICE"]
+            direction TB
+            AdminS["Spring Boot\n- Consume eventos\n- Cálculo de resultados\n- Consultas (Read Model)"]
+        end
+    end
+
+    subgraph MB["MESSAGE BROKER"]
+        direction TB
+        Broker["RabbitMQ"]
+    end
+
+    subgraph DBs["BASES DE DATOS (una por servicio)"]
+        direction LR
+        AuthDB[("AUTH DB\nPostgreSQL\nusuarios, roles, tokens")]
+        VotingDB[("VOTING DB\nPostgreSQL\nvotos, elecciones, reglas")]
+        AdminDB[("ADMIN DB\nPostgreSQL\nresultados agregados")]
+    end
+
+    subgraph BC["REGISTRO INMUTABLE (blockchain-lite)"]
+        direction TB
+        Chain["Hash-chain en Voting DB\ncada voto referencia el hash\ndel voto anterior"]
+    end
+
+    subgraph Obs["OBSERVABILIDAD"]
+        direction TB
+        Prom["Prometheus\nMétricas (via Actuator)"]
+        Graf["Grafana\nDashboards"]
+    end
+
+    subgraph SD["CONCEPTOS DE SISTEMAS DISTRIBUIDOS (evaluación)"]
+        direction TB
+        Coord["🗳️ Coordinación y Acuerdo\nRedis + Redisson (lock distribuido)\nsustituye a Zookeeper\npara cerrar la elección de forma segura"]
+        Trans["🔒 Transacciones y Concurrencia\nSaga coreografiada vía RabbitMQ\n+ control optimista de concurrencia\n(@Version de JPA, evita doble voto)"]
+        DFS["🗂️ Sistema de Archivos Distribuido\nMinIO (S3-compatible)\nAlmacena actas, backups y\nlogs replicados de auditoría"]
+    end
+
+    %% Flujo principal
+    Usuarios --> FE
+    FE -- HTTPS --> Gateway
+    Gateway --> AuthS
+    Gateway --> VotingS
+    Gateway --> AdminS
+
+    VotingS -- "Publica evento voto" --> Broker
+    Broker -- "Consume eventos" --> AdminS
+    Broker -. "Registro opcional" .-> Chain
+
+    AuthS --> AuthDB
+    VotingS --> VotingDB
+    AdminS --> AdminDB
+
+    MS -.-> Obs
+
+    VotingS -. "usa lock/elección\nde líder" .-> Coord
+    AdminS -. "coordina cierre\nde votación" .-> Coord
+    VotingS -. "saga: emitir voto\n+ actualizar conteo" .-> Trans
+    AdminS -. "commit/compensación" .-> Trans
+    AdminS -. "guarda actas y\nrespaldos" .-> DFS
+
+    %% Estilos
+    classDef service fill:#dcfce7,stroke:#16a34a,color:#14532d;
+    classDef gateway fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
+    classDef broker fill:#ffedd5,stroke:#ea580c,color:#7c2d12;
+    classDef db fill:#ede9fe,stroke:#7c3aed,color:#4c1d95;
+    classDef obs fill:#fef9c3,stroke:#ca8a04,color:#713f12;
+    classDef sd fill:#fee2e2,stroke:#dc2626,color:#7f1d1d,stroke-width:2px;
+    classDef fe fill:#e0e7ff,stroke:#4f46e5,color:#312e81;
+
+    class AuthS,VotingS,AdminS service;
+    class Gateway gateway;
+    class Broker,Chain broker;
+    class AuthDB,VotingDB,AdminDB db;
+    class Prom,Graf obs;
+    class FE_NOTE fe;
+    class Coord,Trans,DFS sd;

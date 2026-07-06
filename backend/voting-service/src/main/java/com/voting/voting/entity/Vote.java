@@ -1,28 +1,12 @@
 package com.voting.voting.entity;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-
 @Entity
-@Table(
-    name = "votes",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uk_user_election",
-            columnNames = {
-                "user_id",
-                "election_id"
-            }
-        )
-    }
-)
+@Table(name = "votes", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_user_election", columnNames = {"user_id", "election_id"})
+})
 public class Vote {
 
     @Id
@@ -38,44 +22,32 @@ public class Vote {
     @Column(name = "candidate_id", nullable = false)
     private Long candidateId;
 
+    @Column(name = "previous_hash", length = 64)
+    private String previousHash;
+
+    @Column(nullable = false, unique = true, length = 64)
+    private String hash;
+
+    @Version
+    private Integer version;
+
     @Column(name = "voted_at")
     private LocalDateTime votedAt;
 
     public Vote() {}
 
-    public Long getId() {
-        return id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getElectionId() {
-        return electionId;
-    }
-
-    public void setElectionId(Long electionId) {
-        this.electionId = electionId;
-    }
-
-    public Long getCandidateId() {
-        return candidateId;
-    }
-
-    public void setCandidateId(Long candidateId) {
-        this.candidateId = candidateId;
-    }
-
-    public LocalDateTime getVotedAt() {
-        return votedAt;
-    }
-
-    public void setVotedAt(LocalDateTime votedAt) {
-        this.votedAt = votedAt;
-    }
+    public Long getId() { return id; }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+    public Long getElectionId() { return electionId; }
+    public void setElectionId(Long electionId) { this.electionId = electionId; }
+    public Long getCandidateId() { return candidateId; }
+    public void setCandidateId(Long candidateId) { this.candidateId = candidateId; }
+    public String getPreviousHash() { return previousHash; }
+    public void setPreviousHash(String previousHash) { this.previousHash = previousHash; }
+    public String getHash() { return hash; }
+    public void setHash(String hash) { this.hash = hash; }
+    public Integer getVersion() { return version; }
+    public LocalDateTime getVotedAt() { return votedAt; }
+    public void setVotedAt(LocalDateTime votedAt) { this.votedAt = votedAt; }
 }
