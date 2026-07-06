@@ -4,6 +4,7 @@ public class CandidateResponse {
 
     private Long id;
     private String name;
+    private Long electionId;
 
     public Long getId() {
         return id;
@@ -20,5 +21,13 @@ public class CandidateResponse {
     public void setName(String name) {
         this.name = name;
     }
+    public Long getElectionId() {
+        return electionId; 
+    }
+
+    public void setElectionId(Long electionId) { 
+        this.electionId = electionId; 
+    }
+
 
 }

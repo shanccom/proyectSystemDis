@@ -1,15 +1,16 @@
 package com.voting.voting.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.voting.voting.client.AdminServiceClient;
 import com.voting.voting.dto.ElectionResultResponse;
 import com.voting.voting.dto.StatisticsResponse;
 import com.voting.voting.entity.Vote;
 import com.voting.voting.repository.VoteRepository;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class ResultService {
