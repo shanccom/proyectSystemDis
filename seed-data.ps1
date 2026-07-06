@@ -185,14 +185,7 @@ for ($i = 0; $i -lt $voterTokens.Count; $i++) {
 # ---------------------------------------------------------------------------
 # 8. Cerrar eleccion
 # ---------------------------------------------------------------------------
-Write-Host "`n[8/9] Cerrando eleccion..." -ForegroundColor $Yellow
-try {
-    Invoke-RestMethod -Uri "$GatewayUrl/api/admin/elections/$electionId/status?status=CLOSED" `
-        -Method Put -Headers $adminHeaders | Out-Null
-    Write-Host "  [OK] Eleccion cerrada" -ForegroundColor $Green
-} catch {
-    Write-Host "  [ERROR] No se pudo cerrar la eleccion: $_" -ForegroundColor $Red
-}
+
 
 # ---------------------------------------------------------------------------
 # 9. Mostrar resultados
