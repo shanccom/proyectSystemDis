@@ -1,26 +1,21 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import escudoUNSA from '../images/Escudo_UNSA.png';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
 
   return (
-    <header className="sticky top-0 z-30 border-b-2 border-gold bg-sillar/95 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
+    <header className="sticky top-0 z-30 border-b border-sillar-line/60 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-2.5 sm:px-8">
         <Link to="/" className="group flex items-center gap-2.5">
-          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-t-xl rounded-b-sm border border-gold-soft bg-granate transition-transform duration-150 group-hover:-translate-y-0.5">
-            <svg viewBox="0 0 64 72" className="h-4 w-4">
-              <path
-                d="M6 66 V30 A26 26 0 0 1 58 30 V66"
-                fill="none"
-                className="stroke-gold-soft"
-                strokeWidth="5"
-              />
-              <text x="32" y="52" textAnchor="middle" className="fill-sillar font-serif text-[34px]">A</text>
-            </svg>
-          </span>
+          <img
+            src={escudoUNSA}
+            alt="Escudo UNSA"
+            className="h-8 w-auto flex-shrink-0 transition-transform duration-150 group-hover:-translate-y-0.5"
+          />
           <span className="font-serif text-[1.05rem] font-semibold tracking-tight text-ink">
-            Voto Electrónico
+            Universidad Nacional de San Agustin
           </span>
         </Link>
 
@@ -29,8 +24,8 @@ export default function Navbar() {
             {user.role === 'ADMIN' && (
               <Link
                 to="/admin"
-                className="rounded-lg border border-granate px-3 py-1.5 text-[0.82rem] font-semibold text-granate
-                  transition-colors duration-150 hover:bg-granate hover:text-sillar
+                className="rounded-lg border border-granate/30 px-3 py-1.5 text-[0.82rem] font-semibold text-granate
+                  transition-colors duration-150 hover:border-granate hover:bg-granate hover:text-white
                   focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold focus-visible:outline-offset-2"
               >
                 Admin
