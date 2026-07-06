@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-05T21:56:00.000Z",
+  "title": "Design System: Sistema de Votacion Electronica Distribuido",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Institutional Navy", "canonical": "#16213e", "tonalRamp": ["#0a0f1e", "#16213e", "#1f2f5a", "#2f4475", "#465d90", "#647aaa", "#8a9dc3", "#b6c3db"] },
+      "primary-hover": { "role": "primary", "displayName": "Institutional Navy Hover", "canonical": "#0f3460", "tonalRamp": [] },
+      "civic-green": { "role": "tertiary", "displayName": "Civic Green", "canonical": "#2d6a4f", "tonalRamp": ["#0d241b", "#1a4533", "#2d6a4f", "#42916d", "#5db48b", "#80cfaa", "#aae3c8", "#d4f0e2"] },
+      "neutral-bg": { "role": "neutral", "displayName": "Body Background", "canonical": "#f0f2f5", "tonalRamp": [] },
+      "surface": { "role": "neutral", "displayName": "Surface", "canonical": "#ffffff", "tonalRamp": [] },
+      "ink": { "role": "neutral", "displayName": "Body Text", "canonical": "#1a1a2e", "tonalRamp": [] },
+      "ink-muted": { "role": "neutral", "displayName": "Muted Text", "canonical": "#555555", "tonalRamp": [] },
+      "ink-dim": { "role": "neutral", "displayName": "Dim Text", "canonical": "#999999", "tonalRamp": [] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "App header title only." },
+      "headline": { "displayName": "Headline", "purpose": "Card and section titles." },
+      "title": { "displayName": "Title", "purpose": "Election and candidate names in lists." },
+      "body": { "displayName": "Body", "purpose": "Everyday reading text, input values, button labels." },
+      "label": { "displayName": "Label", "purpose": "Form field labels." },
+      "caption": { "displayName": "Caption", "purpose": "Step names, secondary descriptions." },
+      "fine": { "displayName": "Fine Print", "purpose": "Result bar percentages, vote counts." }
+    },
+    "shadows": [
+      { "name": "card", "value": "0 2px 8px rgba(0,0,0,0.08)", "purpose": "Card container separation from background." },
+      { "name": "nav-bar", "value": "0 1px 4px rgba(0,0,0,0.06)", "purpose": "Step progress bar navigation shadow." },
+      { "name": "interactive-hover", "value": "0 2px 8px rgba(0,0,0,0.12)", "purpose": "Button hover and focus state lift." }
+    ],
+    "motion": [
+      { "name": "state-transition", "value": "all 0.2s ease", "purpose": "Default hover and state transition." },
+      { "name": "list-hover", "value": "all 0.2s ease", "purpose": "List item hover background and border transition." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action button for login and registration.",
+      "html": "<button class=\"ds-btn-primary\">Ingresar</button>",
+      "css": ".ds-btn-primary { background: #16213e; color: #fff; padding: 0.6rem 1.5rem; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s, box-shadow 0.2s; } .ds-btn-primary:hover { background: #0f3460; box-shadow: 0 2px 8px rgba(0,0,0,0.12); } .ds-btn-primary:focus-visible { outline: 2px solid #16213e; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }"
+    },
+    {
+      "name": "Success Button",
+      "kind": "button",
+      "refersTo": "button-success",
+      "description": "Confirm and voting action button.",
+      "html": "<button class=\"ds-btn-success\">Votar</button>",
+      "css": ".ds-btn-success { background: #2d6a4f; color: #fff; padding: 0.6rem 1.5rem; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s, box-shadow 0.2s; } .ds-btn-success:hover { background: #1b4332; box-shadow: 0 2px 8px rgba(0,0,0,0.12); } .ds-btn-success:focus-visible { outline: 2px solid #2d6a4f; outline-offset: 2px; } .ds-btn-success:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Back, cancel, and navigation actions.",
+      "html": "<button class=\"ds-btn-secondary\">Atras</button>",
+      "css": ".ds-btn-secondary { background: #e0e0e0; color: #333; padding: 0.6rem 1.5rem; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; } .ds-btn-secondary:hover { background: #ccc; } .ds-btn-secondary:focus-visible { outline: 2px solid #16213e; outline-offset: 2px; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Text input for email and password.",
+      "html": "<div><label class=\"ds-label\" for=\"demo-email\">Email</label><input class=\"ds-input\" id=\"demo-email\" type=\"email\" placeholder=\"usuario@ejemplo.com\" /></div>",
+      "css": ".ds-label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; color: #444; } .ds-input { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; color: #1a1a2e; background: #fff; box-sizing: border-box; transition: border-color 0.2s; } .ds-input:focus { outline: none; border-color: #16213e; } .ds-input::placeholder { color: #999; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Content container for each step of the voting flow.",
+      "html": "<div class=\"ds-card\"><h2 class=\"ds-card-title\">Iniciar Sesion</h2><p style=\"color:#555;font-size:0.9rem\">Ingrese sus credenciales para acceder al sistema de votacion.</p></div>",
+      "css": ".ds-card { background: #fff; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; } .ds-card-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 1.5rem; color: #1a1a2e; }"
+    },
+    {
+      "name": "List Item",
+      "kind": "custom",
+      "refersTo": "list-item",
+      "description": "Clickable election or candidate list item.",
+      "html": "<ul style=\"list-style:none;padding:0\"><li class=\"ds-list-item\"><div class=\"ds-avatar\">C</div><div><strong>Dr. Carlos Lopez</strong><p style=\"margin:0;font-size:0.85rem;color:#666\">Lista A</p></div></li></ul>",
+      "css": ".ds-list-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1px solid #eee; border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s; } .ds-list-item:hover { border-color: #16213e; background: #f8f9ff; } .ds-avatar { width: 40px; height: 40px; border-radius: 50%; background: #16213e; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }"
+    },
+    {
+      "name": "Step Indicator",
+      "kind": "custom",
+      "refersTo": "step-number",
+      "description": "Wizard step number in the progress bar.",
+      "html": "<div style=\"display:flex;align-items:center;gap:0.5rem\"><span class=\"ds-step-num ds-step-done\">1</span><span style=\"font-size:0.8rem;color:#2d6a4f;font-weight:600\">Login</span></div>",
+      "css": ".ds-step-num { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; background: #e0e0e0; color: #666; } .ds-step-done { background: #2d6a4f; color: #fff; } .ds-step-active { background: #16213e; color: #fff; }"
+    },
+    {
+      "name": "Result Bar",
+      "kind": "custom",
+      "refersTo": "result-bar",
+      "description": "Horizontal bar chart for election results.",
+      "html": "<div class=\"ds-result-item\"><span class=\"ds-result-name\">Dr. Carlos Lopez</span><div class=\"ds-result-bar\"><div class=\"ds-result-fill\" style=\"width:42%\">42%</div></div><span class=\"ds-result-votes\">1240 votes</span></div>",
+      "css": ".ds-result-item { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; } .ds-result-name { width: 120px; font-size: 0.9rem; font-weight: 600; color: #1a1a2e; flex-shrink: 0; } .ds-result-bar { flex: 1; height: 28px; background: #eee; border-radius: 6px; overflow: hidden; } .ds-result-fill { height: 100%; background: linear-gradient(90deg, #16213e, #0f3460); border-radius: 6px; display: flex; align-items: center; padding-left: 0.5rem; color: #fff; font-size: 0.75rem; font-weight: 600; min-width: fit-content; } .ds-result-votes { font-size: 0.85rem; color: #555; width: 60px; text-align: right; flex-shrink: 0; }"
+    },
+    {
+      "name": "Success Alert",
+      "kind": "custom",
+      "refersTo": "alert-success",
+      "description": "Confirmation message banner.",
+      "html": "<div class=\"ds-alert-success\">Voto registrado exitosamente!</div>",
+      "css": ".ds-alert-success { padding: 0.8rem; border-radius: 6px; background: #d8f3dc; color: #1b4332; font-size: 0.85rem; margin-bottom: 1rem; }"
+    },
+    {
+      "name": "Error Alert",
+      "kind": "custom",
+      "refersTo": "alert-error",
+      "description": "Error message banner.",
+      "html": "<div class=\"ds-alert-error\">Credenciales incorrectas. Intente de nuevo.</div>",
+      "css": ".ds-alert-error { padding: 0.8rem; border-radius: 6px; background: #f8d7da; color: #842029; font-size: 0.85rem; margin-bottom: 1rem; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Civic Booth",
+    "overview": "A well-lit voting station \u2014 transparent sightlines, deliberate sightlines, nothing between the voter and their choice. The interface steps aside and lets the act of voting feel consequential, not confusing. Every surface is clean and purposeful: Institutional Navy anchors authority, Civic Green marks progress, and white surfaces keep the focus on content. Shadows are subtle and earned \u2014 they appear only where interaction happens, not as decorative layering.\n\nThis system explicitly rejects corporate dashboard aesthetics, dark mode, gamified feedback, and any visual noise that competes with the voting task. It serves Spanish-speaking university students and faculty; the language is woven into the UI, not bolted on after the fact.",
+    "keyCharacteristics": [
+      "Civic trust through restrained authority colors, not visual density",
+      "Progress as a visible, sequential journey through the 5-step flow",
+      "Feedback on every action \u2014 loading, confirmation, error, result \u2014 never silence",
+      "Mobile-scaled interactions, desktop layouts in one responsive pass",
+      "Flat surfaces with interactive elevation: shadows only on hoverable elements, not on containers at rest"
+    ],
+    "rules": [
+      { "name": "The One Hue Rule", "body": "The navy is the sole chromatic authority. The green is not a second accent \u2014 it is a semantic signal (done, confirm, success), not a decorative accent. If it marks completion, use Civic Green. For everything else, use Institutional Navy or a neutral.", "section": "colors" },
+      { "name": "The Interactive Shadow Rule", "body": "Shadows are earned by interaction, not by container type. Cards and containers sit flat at rest. Shadows appear on hovered buttons, focused inputs, and active interactive states.", "section": "elevation" },
+      { "name": "The Tool Font Rule", "body": "No custom typefaces. The system stack loads instantly, matches the OS chrome, and costs zero network requests. The interface is a tool, not a poster.", "section": "typography" }
+    ],
+    "dos": [
+      "Do use Institutional Navy as the single authority color. Let it anchor headers, primary buttons, and active states.",
+      "Do use Civic Green exclusively for completion and confirmation \u2014 done steps, success buttons, registered votes.",
+      "Do keep surfaces flat at rest. Shadows signal interactivity.",
+      "Do design for mobile first. Voting happens on phones between classes.",
+      "Do give feedback on every voter action \u2014 loading spinner, success message, or error text.",
+      "Do maintain WCAG AA contrast on all text.",
+      "Do write every label, error, and instruction in Spanish."
+    ],
+    "donts": [
+      "Don't use dark backgrounds or dark navbars.",
+      "Don't use gradient text, glassmorphism, side-stripe borders, or any decorative effect.",
+      "Don't gamify the voting flow.",
+      "Don't use numbered section markers (01 / 02 / 03) above the step progress bar.",
+      "Don't let text overflow its container.",
+      "Don't rely on color alone for status.",
+      "Don't use the tiny uppercase tracked eyebrow pattern above any section."
+    ]
+  }
+}

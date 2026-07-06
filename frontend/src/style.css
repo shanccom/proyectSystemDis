@@ -126,6 +126,8 @@ a:hover { text-decoration: underline; }
 .btn-ghost:hover { background: var(--gray-200); color: var(--gray-900); }
 .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.8rem; }
 .btn-block { width: 100%; }
+.btn-success { background: var(--green-500); color: var(--white); }
+.btn-success:hover:not(:disabled) { background: var(--green-600); }
 .link-btn {
   background: none;
   border: none;
@@ -156,7 +158,10 @@ a:hover { text-decoration: underline; }
   background: var(--white);
   transition: border-color 0.15s;
 }
-.form-group input:focus { outline: none; border-color: var(--blue-400); box-shadow: 0 0 0 3px var(--blue-100); }
+.form-group input:focus,
+.form-group textarea:focus { outline: none; border-color: var(--blue-400); box-shadow: 0 0 0 3px var(--blue-100); }
+.form-group input:disabled,
+.form-group textarea:disabled { background: var(--gray-50); color: var(--gray-500); cursor: not-allowed; }
 
 /* ── Alerts ── */
 .alert {

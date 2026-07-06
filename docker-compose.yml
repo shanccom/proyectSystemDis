@@ -153,11 +153,10 @@ services:
       - VOTING_SERVICE_URL=http://voting-service:8082
       - ADMIN_SERVICE_URL=http://admin-service:8083
       - JWT_SECRET=base64secretforjwtsigningkey12345678901234567890
-      - JAVA_TOOL_OPTIONS=-Dio.netty.resolver.dns.cache.cacheTime=0 -Dio.netty.resolver.dns.cache.maxEntries=0
-
+    restart: unless-stopped
     depends_on:
       auth-service:
-        condition: service_started
+        condition: service_healthy
       voting-service:
         condition: service_started
       admin-service:
@@ -177,6 +176,13 @@ services:
       - SPRING_DATASOURCE_PASSWORD=auth_pass
       - JWT_SECRET=base64secretforjwtsigningkey12345678901234567890
       - JWT_EXPIRATION=86400000
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
     depends_on:
       auth-db:
         condition: service_healthy

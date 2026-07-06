@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listElections } from '../api/elections';
+import { listAdminElections, updateElectionStatus } from '../api/admin';
 import { getAdminElectionResult, getAdminCandidateResults } from '../api/results';
 import Loading from '../components/Loading';
 import ErrorAlert from '../components/ErrorAlert';
@@ -13,15 +13,18 @@ export default function Admin() {
   const [candidateResults, setCandidateResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingResults, setLoadingResults] = useState(false);
+  const [busyStatus, setBusyStatus] = useState(null);
   const [error, setError] = useState('');
 
-  useEffect(() => {
+  function loadElections() {
     setLoading(true);
-    listElections()
+    listAdminElections()
       .then(setElections)
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }
+
+  useEffect(loadElections, []);
 
   async function loadResults(electionId) {
     setSelectedId(electionId);
@@ -43,12 +46,31 @@ export default function Admin() {
     }
   }
 
+  async function handleStatusChange(electionId, status) {
+    setBusyStatus(electionId);
+    setError('');
+    try {
+      await updateElectionStatus(electionId, status);
+      loadElections();
+      if (selectedId === electionId) loadResults(electionId);
+    } catch (err) {
+      setError(err.message || 'Error al cambiar estado');
+    } finally {
+      setBusyStatus(null);
+    }
+  }
+
   return (
     <div className="page">
-      <div className="page-head">
-        <h1>Panel de Administración</h1>
-        <p className="page-desc">Resultados consolidados del sistema</p>
-      </div>
+        <div className="page-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h1>Panel de Administración</h1>
+            <p className="page-desc">Resultados consolidados del sistema</p>
+          </div>
+          <button className="btn btn-primary" onClick={() => navigate('/admin/elections')}>
+            + Nueva elección
+          </button>
+        </div>
 
       <ErrorAlert message={error} onClose={() => setError('')} />
 
@@ -62,14 +84,35 @@ export default function Admin() {
           ) : (
             <div className="admin-election-list">
               {elections.map(e => (
-                <button
-                  key={e.id}
+                <div key={e.id}
                   className={`admin-election-item ${selectedId === e.id ? 'active' : ''}`}
+                  style={{ cursor: 'pointer', flexDirection: 'column', alignItems: 'stretch', gap: '0.4rem' }}
                   onClick={() => loadResults(e.id)}
                 >
-                  <span className="admin-election-title">{e.title}</span>
-                  <span className={`badge badge-${e.status.toLowerCase()}`}>{e.status}</span>
-                </button>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span className="admin-election-title">{e.title}</span>
+                    <span className={`badge badge-${e.status.toLowerCase()}`}>{e.status}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.3rem' }} onClick={e => e.stopPropagation()}>
+                    {e.status === 'PENDING' && (
+                      <button className="btn btn-sm btn-success"
+                        onClick={() => handleStatusChange(e.id, 'OPEN')}
+                        disabled={busyStatus === e.id}
+                        style={{ flex: 1, fontSize: '0.7rem', padding: '0.2rem 0.4rem' }}>
+                        Abrir
+                      </button>
+                    )}
+                    {e.status === 'OPEN' && (
+                      <button className="btn btn-sm"
+                        style={{ flex: 1, fontSize: '0.7rem', padding: '0.2rem 0.4rem', background: 'var(--gray-200)', color: 'var(--gray-800)' }}
+                        onClick={() => handleStatusChange(e.id, 'CLOSED')}
+                        disabled={busyStatus === e.id}>
+                        Cerrar
+                      </button>
+                    )}
+
+                  </div>
+                </div>
               ))}
             </div>
           )}

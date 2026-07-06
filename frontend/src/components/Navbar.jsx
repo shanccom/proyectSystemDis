@@ -12,6 +12,9 @@ export default function Navbar() {
         </a>
         {user && (
           <div className="navbar-right">
+            {user.role === 'ADMIN' && (
+              <a href="/admin" className="btn btn-sm btn-outline">Admin</a>
+            )}
             <span className="navbar-role">{user.role}</span>
             <span className="navbar-user">{user.email}</span>
             <button className="btn btn-sm btn-outline" onClick={logout}>

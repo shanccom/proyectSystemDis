@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Vote from './pages/Vote';
 import Results from './pages/Results';
 import Admin from './pages/Admin';
+import AdminElections from './pages/AdminElections';
 
 export default function App() {
   const { loading } = useAuth();
@@ -49,6 +50,14 @@ export default function App() {
             element={
               <ProtectedRoute adminOnly>
                 <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/elections"
+            element={
+              <ProtectedRoute adminOnly>
+                <AdminElections />
               </ProtectedRoute>
             }
           />

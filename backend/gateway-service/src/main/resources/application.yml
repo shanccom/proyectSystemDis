@@ -17,6 +17,13 @@ spring:
           predicates:
             - Path=/api/auth/**
 
+        - id: admin-election-management
+          uri: ${VOTING_SERVICE_URL:http://voting-service:8082}
+          predicates:
+            - Path=/api/admin/elections/**
+          filters:
+            - name: JwtAuthenticationFilter
+
         - id: voting-service
           uri: ${VOTING_SERVICE_URL:http://voting-service:8082}
           predicates:
