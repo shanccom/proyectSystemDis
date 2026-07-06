@@ -25,12 +25,12 @@ public class VoteController {
         return voteService.registerVote(request);
     }
 
-    @GetMapping("/results/{electionId}")
+    @GetMapping("/elections/{electionId}/results")
     public List<ElectionResultResponse> getResults(@PathVariable Long electionId) {
         return resultService.getResults(electionId);
     }
 
-    @GetMapping("/statistics/{electionId}")
+    @GetMapping("/elections/{electionId}/statistics")
     public StatisticsResponse getStatistics(@PathVariable Long electionId) {
         return resultService.getStatistics(electionId);
     }

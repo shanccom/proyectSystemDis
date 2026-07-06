@@ -1,89 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de Votacion Electronica</title>
-  <link rel="stylesheet" href="/src/style.css" />
-</head>
-<body>
-  <header>
-    <h1>Sistema de Votacion Electronica Distribuido</h1>
-    <span>Usuario: <strong id="user-name">---</strong></span>
-  </header>
-
-  <main>
-    <div class="steps">
-      <div class="step" id="step-login"><span class="step-num">1</span> Login</div>
-      <span class="arrow">&#9654;</span>
-      <div class="step" id="step-elections"><span class="step-num">2</span> Elecciones</div>
-      <span class="arrow">&#9654;</span>
-      <div class="step" id="step-vote"><span class="step-num">3</span> Votar</div>
-      <span class="arrow">&#9654;</span>
-      <div class="step" id="step-confirm"><span class="step-num">4</span> Confirmar</div>
-      <span class="arrow">&#9654;</span>
-      <div class="step" id="step-results"><span class="step-num">5</span> Resultados</div>
-    </div>
-
-    <div class="card" id="login">
-      <h2 id="login-title">Iniciar Sesion</h2>
-      <form id="login-form">
-        <div class="form-group">
-          <label for="login-email">Email</label>
-          <input type="email" id="login-email" placeholder="usuario@ejemplo.com" required />
-        </div>
-        <div class="form-group">
-          <label for="login-password">Contrasena</label>
-          <input type="password" id="login-password" placeholder="Ingrese su contrasena" required />
-        </div>
-        <button type="submit" class="btn btn-primary" id="login-btn">Ingresar</button>
-        <p class="alert alert-error hidden mt-1" id="login-error"></p>
-        <p class="mt-1" style="font-size:0.85rem">
-          <a href="#" id="register-link">¿No tienes cuenta? Registrate</a>
-        </p>
-      </form>
-    </div>
-
-    <div class="card hidden" id="elections">
-      <h2>Selecciona una Eleccion</h2>
-      <ul class="election-list" id="elections-list"></ul>
-    </div>
-
-    <div class="card hidden" id="vote">
-      <div class="flex-between">
-        <h2>Votar</h2>
-        <span style="font-size:0.8rem;color:#666">Eleccion: <strong id="selected-election-name"></strong></span>
-      </div>
-      <p style="margin-bottom:1rem;font-size:0.85rem;color:#555">Selecciona un candidato:</p>
-      <ul class="candidate-list" id="candidates-list"></ul>
-      <div class="mt-1">
-        <button class="btn btn-success" id="vote-btn" disabled>Votar</button>
-        <button class="btn btn-secondary" onclick="showStep('elections')">Atras</button>
-      </div>
-    </div>
-
-    <div class="card hidden text-center" id="confirm">
-      <h2>Confirma tu voto</h2>
-      <p style="margin:1rem 0;font-size:1.1rem">
-        Voto por <strong id="confirm-candidate"></strong>
-      </p>
-      <p style="font-size:0.85rem;color:#666">Eleccion: <span id="confirm-election"></span></p>
-      <div class="mt-1" style="display:flex;gap:1rem;justify-content:center">
-        <button class="btn btn-success" id="confirm-yes">Si, votar</button>
-        <button class="btn btn-secondary" id="confirm-no">Cancelar</button>
-      </div>
-      <div class="alert alert-success hidden mt-1" id="vote-success">
-        Voto registrado exitosamente!
-      </div>
-    </div>
-
-    <div class="card hidden" id="results">
-      <h2 id="results-title">Resultados</h2>
-      <div id="results-body"></div>
-      <button class="btn btn-secondary mt-1" id="back-to-elections">Volver a elecciones</button>
-    </div>
-  </main>
-
-  <script type="module" src="/src/main.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema de Votación Electrónica Distribuido</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

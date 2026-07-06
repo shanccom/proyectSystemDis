@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS election_results (
-    id SERIAL PRIMARY KEY,
-    election_id INTEGER NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    election_id BIGINT NOT NULL,
     election_title VARCHAR(200) NOT NULL,
     total_votes BIGINT DEFAULT 0,
     status VARCHAR(20) DEFAULT 'PENDING',
@@ -9,9 +9,9 @@ CREATE TABLE IF NOT EXISTS election_results (
 );
 
 CREATE TABLE IF NOT EXISTS candidate_results (
-    id SERIAL PRIMARY KEY,
-    election_id INTEGER NOT NULL,
-    candidate_id INTEGER NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    election_id BIGINT NOT NULL,
+    candidate_id BIGINT NOT NULL,
     candidate_name VARCHAR(200) NOT NULL,
     party VARCHAR(150),
     vote_count BIGINT DEFAULT 0,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS candidate_results (
 );
 
 CREATE TABLE IF NOT EXISTS audit_log (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     event_type VARCHAR(50) NOT NULL,
     payload JSONB,
     processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

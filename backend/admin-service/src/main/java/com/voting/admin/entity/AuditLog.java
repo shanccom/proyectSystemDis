@@ -1,6 +1,8 @@
 package com.voting.admin.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,7 +16,7 @@ public class AuditLog {
     @Column(name = "event_type", nullable = false, length = 50)
     private String eventType;
 
-    @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String payload;
 
     @Column(name = "processed_at")

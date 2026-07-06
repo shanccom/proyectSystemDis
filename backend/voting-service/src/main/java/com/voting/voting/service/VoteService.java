@@ -2,11 +2,13 @@ package com.voting.voting.service;
 
 import com.voting.voting.dto.VoteRequest;
 import com.voting.voting.dto.VoteResponse;
+import com.voting.voting.entity.Candidate;
 import com.voting.voting.entity.Election;
 import com.voting.voting.entity.Vote;
 import com.voting.voting.event.VoteEvent;
 import com.voting.voting.event.VoteEventPublisher;
 import com.voting.voting.exception.VoteAlreadyExistsException;
+import com.voting.voting.repository.CandidateRepository;
 import com.voting.voting.repository.ElectionRepository;
 import com.voting.voting.repository.VoteRepository;
 import org.springframework.stereotype.Service;
@@ -23,13 +25,16 @@ public class VoteService {
 
     private final VoteRepository voteRepository;
     private final ElectionRepository electionRepository;
+    private final CandidateRepository candidateRepository;
     private final VoteEventPublisher eventPublisher;
 
     public VoteService(VoteRepository voteRepository,
                        ElectionRepository electionRepository,
+                       CandidateRepository candidateRepository,
                        VoteEventPublisher eventPublisher) {
         this.voteRepository = voteRepository;
         this.electionRepository = electionRepository;
+        this.candidateRepository = candidateRepository;
         this.eventPublisher = eventPublisher;
     }
 
@@ -61,9 +66,14 @@ public class VoteService {
 
         vote = voteRepository.save(vote);
 
+        String electionTitle = election.getTitle();
+        String candidateName = candidateRepository.findById(request.getCandidateId())
+                .map(Candidate::getName)
+                .orElse("Candidate #" + request.getCandidateId());
+
         eventPublisher.publish(new VoteEvent(
-                vote.getId(), vote.getUserId(), vote.getElectionId(),
-                vote.getCandidateId(), vote.getHash(),
+                vote.getId(), vote.getUserId(), vote.getElectionId(), electionTitle,
+                vote.getCandidateId(), candidateName, vote.getHash(),
                 vote.getPreviousHash(), vote.getVotedAt()
         ));
 

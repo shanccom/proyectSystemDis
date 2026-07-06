@@ -153,6 +153,7 @@ services:
       - VOTING_SERVICE_URL=http://voting-service:8082
       - ADMIN_SERVICE_URL=http://admin-service:8083
       - JWT_SECRET=base64secretforjwtsigningkey12345678901234567890
+
     depends_on:
       auth-service:
         condition: service_started

@@ -6,6 +6,7 @@ import com.voting.admin.entity.ElectionResult;
 import com.voting.admin.repository.AuditLogRepository;
 import com.voting.admin.repository.CandidateResultRepository;
 import com.voting.admin.repository.ElectionResultRepository;
+import com.voting.voting.event.VoteEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -36,9 +37,11 @@ public class VoteEventConsumer {
         ElectionResult electionResult = electionResultRepository
                 .findByElectionId(event.getElectionId())
                 .orElseGet(() -> {
+                    String title = event.getElectionTitle() != null
+                            ? event.getElectionTitle()
+                            : "Election #" + event.getElectionId();
                     ElectionResult er = new ElectionResult(
-                            event.getElectionId(),
-                            "Election #" + event.getElectionId()
+                            event.getElectionId(), title
                     );
                     er.setStatus("OPEN");
                     return electionResultRepository.save(er);
@@ -52,9 +55,12 @@ public class VoteEventConsumer {
                 .findByElectionIdAndCandidateId(
                         event.getElectionId(), event.getCandidateId())
                 .orElseGet(() -> {
+                    String candidateName = event.getCandidateName() != null
+                            ? event.getCandidateName()
+                            : "Candidate #" + event.getCandidateId();
                     CandidateResult cr = new CandidateResult(
                             event.getElectionId(), event.getCandidateId(),
-                            "Candidate #" + event.getCandidateId(), null
+                            candidateName, null
                     );
                     return candidateResultRepository.save(cr);
                 });

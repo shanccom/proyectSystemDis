@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS elections (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description TEXT,
     start_date TIMESTAMP NOT NULL,
@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS elections (
 );
 
 CREATE TABLE IF NOT EXISTS candidates (
-    id SERIAL PRIMARY KEY,
-    election_id INTEGER NOT NULL REFERENCES elections(id),
+    id BIGSERIAL PRIMARY KEY,
+    election_id BIGINT NOT NULL REFERENCES elections(id),
     name VARCHAR(150) NOT NULL,
     party VARCHAR(150),
     photo_url TEXT,
@@ -18,10 +18,10 @@ CREATE TABLE IF NOT EXISTS candidates (
 );
 
 CREATE TABLE IF NOT EXISTS votes (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    election_id INTEGER NOT NULL REFERENCES elections(id),
-    candidate_id INTEGER NOT NULL REFERENCES candidates(id),
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    election_id BIGINT NOT NULL REFERENCES elections(id),
+    candidate_id BIGINT NOT NULL REFERENCES candidates(id),
     previous_hash VARCHAR(64),
     hash VARCHAR(64) UNIQUE NOT NULL,
     version INTEGER DEFAULT 0,
