@@ -1,9 +1,10 @@
 package com.voting.voting.service;
 
-import com.voting.voting.client.AdminServiceClient;
 import com.voting.voting.dto.ElectionResultResponse;
 import com.voting.voting.dto.StatisticsResponse;
+import com.voting.voting.entity.Candidate;
 import com.voting.voting.entity.Vote;
+import com.voting.voting.repository.CandidateRepository;
 import com.voting.voting.repository.VoteRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,48 +16,32 @@ import java.util.stream.Collectors;
 public class ResultService {
 
     private final VoteRepository voteRepository;
-    private final AdminServiceClient adminServiceClient;
+    private final CandidateRepository candidateRepository;
 
-    public ResultService(
-            VoteRepository voteRepository,
-            AdminServiceClient adminServiceClient
-    ) {
+    public ResultService(VoteRepository voteRepository,
+                         CandidateRepository candidateRepository) {
         this.voteRepository = voteRepository;
-        this.adminServiceClient = adminServiceClient;
+        this.candidateRepository = candidateRepository;
     }
 
     public List<ElectionResultResponse> getResults(Long electionId) {
-
         List<Vote> votes = voteRepository.findByElectionId(electionId);
 
-        Map<Long, Long> groupedVotes = votes.stream()
+        Map<Long, Long> grouped = votes.stream()
                 .collect(Collectors.groupingBy(
-                        Vote::getCandidateId,
-                        Collectors.counting()
-                ));
+                        Vote::getCandidateId, Collectors.counting()));
 
-        return groupedVotes.entrySet()
-                .stream()
-                .map(entry -> new ElectionResultResponse(
-                        entry.getKey(),
-                        adminServiceClient.getCandidateName(entry.getKey()),
-                        entry.getValue()
-                ))
-                .toList();
+        List<Candidate> candidates = candidateRepository.findByElectionId(electionId);
+
+        return candidates.stream().map(c -> {
+            Long count = grouped.getOrDefault(c.getId(), 0L);
+            return new ElectionResultResponse(c.getId(), c.getName(), count);
+        }).toList();
     }
 
     public StatisticsResponse getStatistics(Long electionId) {
-
         long totalVotes = voteRepository.countByElectionId(electionId);
-
-        int totalCandidates = adminServiceClient
-                .getCandidatesByElection(electionId)
-                .size();
-
-        return new StatisticsResponse(
-                electionId,
-                totalVotes,
-                totalCandidates
-        );
+        int totalCandidates = candidateRepository.findByElectionId(electionId).size();
+        return new StatisticsResponse(electionId, totalVotes, totalCandidates);
     }
 }

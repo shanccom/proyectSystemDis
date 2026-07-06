@@ -1,15 +1,166 @@
 services:
-  postgres-db:
+
+  # ── Bases de datos ──
+  auth-db:
     image: postgres:15-alpine
-    container_name: voting-db
+    container_name: auth-db
     environment:
-      POSTGRES_USER: user_admin
-      POSTGRES_PASSWORD: password_secret
-      POSTGRES_DB: voting_system
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+      POSTGRES_DB: auth_db
     ports:
       - "5432:5432"
     volumes:
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docker/init/auth-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - auth-db-data:/var/lib/postgresql/data
+    networks:
+      - voting-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  voting-db:
+    image: postgres:15-alpine
+    container_name: voting-db
+    environment:
+      POSTGRES_USER: voting_user
+      POSTGRES_PASSWORD: voting_pass
+      POSTGRES_DB: voting_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./docker/init/voting-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - voting-db-data:/var/lib/postgresql/data
+    networks:
+      - voting-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voting_user -d voting_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  admin-db:
+    image: postgres:15-alpine
+    container_name: admin-db
+    environment:
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: admin_pass
+      POSTGRES_DB: admin_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./docker/init/admin-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - admin-db-data:/var/lib/postgresql/data
+    networks:
+      - voting-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_user -d admin_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Message Broker ──
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: voting
+      RABBITMQ_DEFAULT_PASS: voting_pass
+    networks:
+      - voting-network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Coordinación distribuida (Redis) ──
+  redis:
+    image: redis:7-alpine
+    container_name: voting-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - voting-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Sistema de archivos distribuido (MinIO) ──
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minio_admin
+      MINIO_ROOT_PASSWORD: minio_secret
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - voting-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Observabilidad ──
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - voting-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./docker/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - grafana-data:/var/lib/grafana
+    networks:
+      - voting-network
+    depends_on:
+      - prometheus
+
+  # ── Microservicios ──
+  gateway-service:
+    build: ./backend/gateway-service
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - VOTING_SERVICE_URL=http://voting-service:8082
+      - ADMIN_SERVICE_URL=http://admin-service:8083
+      - JWT_SECRET=base64secretforjwtsigningkey12345678901234567890
+    restart: unless-stopped
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      voting-service:
+        condition: service_started
+      admin-service:
+        condition: service_started
     networks:
       - voting-network
 
@@ -19,11 +170,22 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/voting_system
-      - SPRING_DATASOURCE_USERNAME=user_admin
-      - SPRING_DATASOURCE_PASSWORD=password_secret
+      - SERVER_PORT=8081
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-db:5432/auth_db
+      - SPRING_DATASOURCE_USERNAME=auth_user
+      - SPRING_DATASOURCE_PASSWORD=auth_pass
+      - JWT_SECRET=base64secretforjwtsigningkey12345678901234567890
+      - JWT_EXPIRATION=86400000
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
     depends_on:
-      - postgres-db
+      auth-db:
+        condition: service_healthy
     networks:
       - voting-network
 
@@ -33,11 +195,23 @@ services:
     ports:
       - "8082:8082"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/voting_system
-      - SPRING_DATASOURCE_USERNAME=user_admin
-      - SPRING_DATASOURCE_PASSWORD=password_secret
+      - SERVER_PORT=8082
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://voting-db:5432/voting_db
+      - SPRING_DATASOURCE_USERNAME=voting_user
+      - SPRING_DATASOURCE_PASSWORD=voting_pass
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=voting
+      - SPRING_RABBITMQ_PASSWORD=voting_pass
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
     depends_on:
-      - postgres-db
+      voting-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - voting-network
 
@@ -47,11 +221,23 @@ services:
     ports:
       - "8083:8083"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/voting_system
-      - SPRING_DATASOURCE_USERNAME=user_admin
-      - SPRING_DATASOURCE_PASSWORD=password_secret
+      - SERVER_PORT=8083
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://admin-db:5432/admin_db
+      - SPRING_DATASOURCE_USERNAME=admin_user
+      - SPRING_DATASOURCE_PASSWORD=admin_pass
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=voting
+      - SPRING_RABBITMQ_PASSWORD=voting_pass
+      - MINIO_URL=http://minio:9000
+      - MINIO_ACCESS_KEY=minio_admin
+      - MINIO_SECRET_KEY=minio_secret
+      - MINIO_BUCKET=voting-acts
     depends_on:
-      - postgres-db
+      admin-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - voting-network
 
@@ -60,8 +246,18 @@ services:
     container_name: voting-frontend
     ports:
       - "5173:5173"
+    environment:
+      - VITE_API_GATEWAY=http://localhost:8080
     networks:
       - voting-network
+
+volumes:
+  auth-db-data:
+  voting-db-data:
+  admin-db-data:
+  minio-data:
+  prometheus-data:
+  grafana-data:
 
 networks:
   voting-network:
