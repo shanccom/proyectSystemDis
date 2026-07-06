@@ -267,12 +267,6 @@ export default function Results() {
           >
             Actualizar
           </button>
-          <button
-            onClick={() => navigate(`/vote/${id}`)}
-            className="rounded-lg bg-granate px-5 py-2.5 text-[0.88rem] font-semibold text-sillar transition-[background-color,transform] duration-150 enabled:hover:bg-granate-deep enabled:active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold focus-visible:outline-offset-2"
-          >
-            Volver a votar
-          </button>
         </div>
       </div>
     </div>

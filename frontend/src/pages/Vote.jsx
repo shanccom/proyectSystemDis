@@ -48,6 +48,11 @@ export default function Vote() {
     setError('');
     try {
       const result = await castVote(user.id, election.id, selected.id);
+      const votedIds = JSON.parse(localStorage.getItem('votedElections') || '[]');
+      if (!votedIds.includes(election.id)) {
+        votedIds.push(election.id);
+        localStorage.setItem('votedElections', JSON.stringify(votedIds));
+      }
       setSuccess(`Voto registrado exitosamente. Hash: ${result.hash.slice(0, 16)}...`);
       setTimeout(() => navigate(`/results/${election.id}`), 2000);
     } catch (err) {

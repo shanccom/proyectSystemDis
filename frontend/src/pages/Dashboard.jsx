@@ -142,7 +142,11 @@ export default function Dashboard() {
               return (
                 <button
                   key={election.id}
-                  onClick={() => navigate(`/vote/${election.id}`)}
+                  onClick={() => {
+                    const votedIds = JSON.parse(localStorage.getItem('votedElections') || '[]');
+                    if (votedIds.includes(election.id)) return;
+                    navigate(`/vote/${election.id}`);
+                  }}
                   className="group relative flex flex-col overflow-hidden rounded-2xl border border-sillar-line bg-white text-left
                     shadow-[0_1px_3px_-1px_rgba(50,42,32,0.06)]
                     transition-all duration-150 hover:-translate-y-1 hover:border-granate/50 hover:shadow-[0_12px_28px_-16px_rgba(50,42,32,0.3)]
