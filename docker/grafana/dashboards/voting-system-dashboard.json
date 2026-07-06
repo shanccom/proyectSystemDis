@@ -1,0 +1,153 @@
+{
+  "id": null,
+  "uid": "voting-system-monitoring",
+  "title": "Distributed Voting System",
+  "tags": ["spring-boot", "microservices", "voting-system", "prometheus"],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 0,
+  "schemaVersion": 38,
+  "version": 0,
+  "refresh": "30s",
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "JVM Memory Usage",
+      "type": "timeseries",
+      "description": "Heap and Non-Heap memory usage with max heap boundary",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(jvm_memory_used_bytes{area=\"heap\", instance=~\"${service:regex}\"}) by (instance)", "legendFormat": "Heap Used - {{instance}}", "refId": "A" },
+        { "expr": "sum(jvm_memory_used_bytes{area=\"nonheap\", instance=~\"${service:regex}\"}) by (instance)", "legendFormat": "Non-Heap Used - {{instance}}", "refId": "B" },
+        { "expr": "sum(jvm_memory_max_bytes{area=\"heap\", instance=~\"${service:regex}\"}) by (instance)", "legendFormat": "Heap Max - {{instance}}", "refId": "C" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "bytes", "custom": { "fillOpacity": 15, "lineWidth": 1, "spanNulls": true, "showPoints": "never", "gradientMode": "none", "lineInterpolation": "smooth" }, "color": { "mode": "palette-classic" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } },
+        "overrides": [{ "matcher": { "id": "byName", "options": "Heap Max" }, "properties": [{ "id": "custom.fillOpacity", "value": 0 }, { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } }, { "id": "custom.lineWidth", "value": 2 }] }]
+      },
+      "options": { "legend": { "calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } }
+    },
+    {
+      "id": 2,
+      "title": "CPU Usage",
+      "type": "timeseries",
+      "description": "System and process CPU usage (0-1 = 0%-100%)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "system_cpu_usage{instance=~\"${service:regex}\"}", "legendFormat": "System CPU - {{instance}}", "refId": "A" },
+        { "expr": "process_cpu_usage{instance=~\"${service:regex}\"}", "legendFormat": "Process CPU - {{instance}}", "refId": "B" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "min": 0, "max": 1, "custom": { "fillOpacity": 15, "lineWidth": 1, "spanNulls": true, "showPoints": "never", "gradientMode": "none", "lineInterpolation": "smooth" }, "color": { "mode": "palette-classic" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 0.7 }, { "color": "red", "value": 0.9 }] } },
+        "overrides": [{ "matcher": { "id": "byName", "options": "Process CPU" }, "properties": [{ "id": "custom.fillOpacity", "value": 20 }, { "id": "custom.lineWidth", "value": 2 }] }]
+      },
+      "options": { "legend": { "calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } }
+    },
+    {
+      "id": 3,
+      "title": "HTTP Request Rate",
+      "type": "timeseries",
+      "description": "HTTP requests per second",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{instance=~\"${service:regex}\"}[1m])) by (instance)", "legendFormat": "Req/s - {{instance}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "cps", "custom": { "fillOpacity": 15, "lineWidth": 1, "spanNulls": true, "showPoints": "never", "gradientMode": "none", "lineInterpolation": "smooth" }, "color": { "mode": "palette-classic" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } } },
+      "options": { "legend": { "calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } }
+    },
+    {
+      "id": 4,
+      "title": "HTTP Error Rate",
+      "type": "timeseries",
+      "description": "HTTP 4xx and 5xx error rates per second",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{instance=~\"${service:regex}\", status=~\"4..\"}[1m])) by (instance)", "legendFormat": "4xx - {{instance}}", "refId": "A" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{instance=~\"${service:regex}\", status=~\"5..\"}[1m])) by (instance)", "legendFormat": "5xx - {{instance}}", "refId": "B" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "cps", "custom": { "fillOpacity": 20, "lineWidth": 1, "spanNulls": true, "showPoints": "never" }, "color": { "mode": "palette-classic" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } }, "overrides": [{ "matcher": { "id": "byName", "options": "5xx" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }] }] },
+      "options": { "legend": { "calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } }
+    },
+    {
+      "id": 5,
+      "title": "HTTP Request Latency",
+      "type": "timeseries",
+      "description": "Request latency percentiles (p50, p95, p99)",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{instance=~\"${service:regex}\"}[1m])) by (le))", "legendFormat": "p50", "refId": "A" },
+        { "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{instance=~\"${service:regex}\"}[1m])) by (le))", "legendFormat": "p95", "refId": "B" },
+        { "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{instance=~\"${service:regex}\"}[1m])) by (le))", "legendFormat": "p99", "refId": "C" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "fillOpacity": 0, "lineWidth": 2, "spanNulls": true, "showPoints": "never", "gradientMode": "none", "lineInterpolation": "smooth" }, "color": { "mode": "palette-classic" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 0.5 }, { "color": "red", "value": 1.0 }] } } },
+      "options": { "legend": { "calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } }
+    },
+    {
+      "id": 6,
+      "title": "Thread Count",
+      "type": "timeseries",
+      "description": "Live and daemon JVM threads",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "jvm_threads_live_threads{instance=~\"${service:regex}\"}", "legendFormat": "Live Threads - {{instance}}", "refId": "A" },
+        { "expr": "jvm_threads_daemon_threads{instance=~\"${service:regex}\"}", "legendFormat": "Daemon Threads - {{instance}}", "refId": "B" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "fillOpacity": 15, "lineWidth": 1, "spanNulls": true, "showPoints": "never", "gradientMode": "none", "lineInterpolation": "smooth" }, "color": { "mode": "palette-classic" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } }, "overrides": [{ "matcher": { "id": "byName", "options": "Daemon Threads" }, "properties": [{ "id": "custom.fillOpacity", "value": 0 }, { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [5, 5] } }] }] },
+      "options": { "legend": { "calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } }
+    },
+    {
+      "id": 7,
+      "title": "GC Activity",
+      "type": "timeseries",
+      "description": "GC pause count and duration",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "rate(jvm_gc_pause_seconds_count{instance=~\"${service:regex}\"}[1m])", "legendFormat": "GC Count/s - {{instance}}", "refId": "A" },
+        { "expr": "rate(jvm_gc_pause_seconds_sum{instance=~\"${service:regex}\"}[1m])", "legendFormat": "GC Time/s - {{instance}}", "refId": "B" }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "fillOpacity": 15, "lineWidth": 1, "spanNulls": true, "showPoints": "never", "gradientMode": "none", "lineInterpolation": "smooth" }, "color": { "mode": "palette-classic" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } }, "overrides": [{ "matcher": { "id": "byRegexp", "options": "/GC Count/" }, "properties": [{ "id": "unit", "value": "cps" }] }, { "matcher": { "id": "byRegexp", "options": "/GC Time/" }, "properties": [{ "id": "unit", "value": "s" }, { "id": "custom.fillOpacity", "value": 0 }, { "id": "custom.lineWidth", "value": 2 }] }] },
+      "options": { "legend": { "calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } }
+    },
+    {
+      "id": 8,
+      "title": "Votes Registered Per Minute",
+      "type": "timeseries",
+      "description": "Successful POST requests per minute (votes/min)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{instance=~\"${service:regex}\", method=\"POST\", status=~\"2..\"}[1m])) by (instance) * 60", "legendFormat": "POST 2xx/min - {{instance}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "cpm", "custom": { "fillOpacity": 15, "lineWidth": 1, "spanNulls": true, "showPoints": "never", "gradientMode": "none", "lineInterpolation": "smooth" }, "color": { "mode": "palette-classic" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } } },
+      "options": { "legend": { "calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "type": "custom",
+        "label": "Microservice",
+        "query": "gateway-service:8080, auth-service:8081, voting-service:8082, admin-service:8083",
+        "current": { "selected": true, "text": "gateway-service:8080", "value": "gateway-service:8080" },
+        "hide": 0,
+        "includeAll": true,
+        "multi": false,
+        "options": [],
+        "refresh": 1,
+        "sort": 1,
+        "description": "Select a microservice to monitor"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": { "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"], "now": true }
+}
